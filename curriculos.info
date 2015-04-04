@@ -1,0 +1,11 @@
+name = Controle de currículos enviados
+description = "Controla os currículos enviados e os envios de currículos do projeto ProcurandoEmprego"
+package = ProcurandoEmprego
+core = 7.x
+configure = admin/config/procurandoemprego/curriculos
+
+; Information added by Drupal.org packaging script on 2014-12-19
+version = "7.x-1.0"
+core = "7.x"
+project = "curriculos"
+datestamp = "1419029284"

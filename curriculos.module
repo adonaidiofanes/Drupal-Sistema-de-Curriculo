@@ -1,0 +1,463 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function curriculos_menu() {
+  $items['admin/config/procurandoemprego/curriculos'] = array(
+    'title' => 'Currículos',
+    'description' => 'Gerenciamento de submissões de currículos',
+    'page callback' => 'page_adm_curriculos',
+    'access callback' => TRUE,
+    );
+  $items['enviar_curriculo/%'] = array(
+    'title' => 'Enviar Curriculo',
+    'description' => 'Pagina responsavel a enviar curriculos',
+    'page callback' => 'page_enviar_curriculo',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    );
+  return $items;
+}
+
+/**
+ * Implements _page_adm_curriculos().
+ */
+function page_adm_curriculos(){
+  echo "Administração de currículos";
+}
+
+/**
+ * Implements page_enviar_curriculo().
+ */
+function page_enviar_curriculo(){
+  global $user;
+  global $base_url;
+  //drupal_goto('node', array(arg(1)));
+
+  if(!user_is_anonymous()){
+    // @TODO: Cadastrar curriculo
+    // Set message sucesso ou erro
+    $nid = arg(1);
+    $uid = $user->uid;
+    echo "Nid:" . $nid . " - Uid:" . $uid;
+  } else {
+    // Enviar para login
+    // Set message cadastre-se | Status: 'status','warning','error'
+    drupal_set_message(t('Você deve estar logado para enviar currículos!<br>Cadastre-se no formulário abaixo.'), 'error');
+    drupal_goto($base_url . '/user/register');
+    // @TODO: Gravar o node do camarada em uma sessao e:
+    // * Após ele logar, se ele tiver cadastro envie o CV
+    // * Se ele nao tiver cadastro, após ele salvar o CV, enviar CV
+  }
+}
+
+/**
+ * Implements enviar_curriculo().
+ */
+function enviar_curriculo(){
+  // @TODO: Enviar curriculo para o email cadastrado pela vaga
+  // @TODO: Selecionar TPL do curriculo do usuario
+  // @TODO: Setar mensagem de enviado com sucesso
+}
+
+/**
+ * Implements hook_enable().
+ */
+function curriculos_enable(){
+  $message = t('The "curriculos" module was successfully enabled.');
+  drupal_set_message($message, 'status');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function curriculos_schema(){
+  $schema['curriculos'] = array(
+    'description' => t('Controle de curriculos'),
+    'fields' => array(
+      'cid' => array('description' => t('Id do Cv enviado.'), 'type' => 'int', 'not null' => TRUE, 'auto increment' => TRUE),
+      'nid' => array(
+        'description' => t('The primary identifier for a node.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'uid' => array(
+        'description' => t('Node do usuario'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+    ),
+    'primary key' => array('cid'),
+
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+/*
+
+  @TODO: Fazer remover a tabela do BD
+
+function curriculos_uninstall(){
+  $result = db_query("SELECT * FROM {curriculos}");
+  foreach ($result as $data) {
+    //db_query("DELETE FROM {variable} WHERE name = :name", array(':name' => 'curriculos_', $data->nid));
+  }
+}*/
+
+/**
+ * Implements hook_theme().
+ */
+/*function curriculos_theme(){
+  $module_path = drupal_get_path('module', 'curriculos');
+  
+  return array(
+    'gerar_etiquetas' =>  array(
+      'type' => 'theme',
+      'template' => 'gerar_etiquetas',
+      'path' => $module_path . '/templates',
+      'variables' => array(
+        //'nome' => NULL,
+        //'endereco' => NULL,
+        'cadastros' => NULL,
+      ),
+    ),
+
+  );
+}
+*/
+
+function verificar_se_cv_foi_enviado($vars){
+
+  $result = db_query("SELECT * FROM {curriculos} WHERE nid = :nid AND uid = :uid", array(':nid' => $vars['nid'], ':uid' => $vars['uid']));
+  $contaCadastro = $result->rowCount();
+
+  // Verificar se temos email cadastrado para essa vaga
+  if(isset($vars['email']) && (!empty($vars['email']['und'][0]))){
+    // Adicionar botao de enviar CV
+    if($contaCadastro > 0){
+      // Botao Cv ja enviado
+      echo _tpl_Bt_Cv_Enviado();
+    } else {
+      // Botao enviar CV
+      echo _tpl_Bt_Cv_Enviar($vars);
+    }
+  } 
+}
+
+function _tpl_Bt_Cv_Enviado(){
+  $tpl = '<button type="button" class="btn btn-default btn-lg btn-danger navbar-btn disabled"><i class="glyphicon glyphicon-ok"></i> Currículo já enviado!</button>';
+  return $tpl;
+}
+function _tpl_Bt_Cv_Enviar($vars){
+  global $base_url;
+  $tpl  = "<form action='$base_url/enviar_curriculo/$vars[nid]/'>";
+  $tpl .= '<button type="submit" class="btn btn-default btn-lg btn-success"><i class="glyphicon glyphicon-send"></i> Enviar Currículo</button>';
+  $tpl .= "</form>";
+  return $tpl;
+}
+
+function _tpl_Padrao_Vaga($node){
+  
+  # Titulo
+
+  # Descricao
+  $tpl = render($node->body['und'][0]['value']);
+
+  # Dados Geográficos
+  # - Estado, Cidade, Bairro, Zona
+  $Estado = "";
+  if(isset($node->field_estado) && (!empty($node->field_estado['und'][0]))){
+    $Estado = "<p><i class='glyphicon glyphicon-map-marker'></i> Estado: " . $node->field_estado['und'][0]['value'] . "</p>";
+  }
+
+  $Cidade = "";
+  if(isset($node->field_cidade) && (!empty($node->field_cidade['und'][0]))){
+    $Cidade = "<p><i class='glyphicon glyphicon-map-marker'></i> Cidade: " . $node->field_cidade['und'][0]['value'] . "</p>";
+  }
+
+  $Bairro = "";
+  if(isset($node->field_bairro) && (!empty($node->field_bairro['und'][0]))){
+    $Bairro = "<p><i class='glyphicon glyphicon-map-marker'></i> Bairro: " . $node->field_bairro['und'][0]['value'] . "</p>";
+  }
+
+  $Zona = "";
+  if(isset($node->field_zona) && (!empty($node->field_zona['und'][0]))){
+    $Estado = "<p><i class='glyphicon glyphicon-map-marker'></i> Zona: " . $node->field_zona['und'][0]['value'] . "</p>";
+  }
+
+  $Dados_Geograficos = $Cidade . $Estado . $Zona . $Bairro;
+
+  if($Cidade || $Estado || $Zona || $Bairro){
+    $tpl .= '<div class="well well-sm">'. $Dados_Geograficos .'</div>';
+  }
+
+  return $tpl;
+
+  # Email
+  # Assunto
+
+}
+
+function _tpl_Curriculo(){
+  global $user;
+
+  // Exemplo: http://stackoverflow.com/questions/9548116/drupal-7-load-profile2-programmatically
+  // Google: function profile2_by_uid_load($uid, $type_name) {
+  $types = profile2_get_types();
+  //profile2_load_by_user($account, $type_name = NULL)
+
+  if( ($types) && (!empty($types)) && (isset($types['curriculo'])) && ($types['curriculo']->type == 'curriculo') )
+  {
+
+    $p = profile2_load_by_user($user->uid, $types['curriculo']->type);
+    
+    // Verificar se existe o campo nome
+    if(isset($p->field_nome_completo) && (isset($p->field_nome_completo['und'])) &&
+       isset($p->field_nome_completo['und']) &&
+       isset($p->field_nome_completo['und'][0]) &&
+       isset($p->field_nome_completo['und'][0]['value'])  &&
+       !empty($p->field_nome_completo['und'][0]['value'])
+      ){ 
+      // Variaveis
+      $field_nome_completo = undValue($p->field_nome_completo);
+      if(!$field_nome_completo){
+        return;
+      }
+
+      $field_sexo = ucfirst(undValue($p->field_sexo));
+      $field_data_de_nascimento = undValue($p->field_data_de_nascimento);
+      $field_estado_civil = ucfirst(undValue($p->field_estado_civil));
+
+      $field_nacionalidade = undValue($p->field_nacionalidade);
+      if($field_nacionalidade)
+        $field_nacionalidade = $field_nacionalidade . ", ";
+
+      $field_endereco = undValue($p->field_endereco);
+
+      $field_numero = undValue($p->field_numero);
+      if($field_numero)
+        $field_numero = ", " . $field_numero;
+
+      $field_complemento = undValue($p->field_complemento);
+      if($field_complemento)
+        $field_complemento = " / " . $field_complemento;
+
+      $field_bairro = " - " . undValue($p->field_bairro) . " - ";
+
+      $field_cidade = undValue($p->field_cidade);
+      
+      $field_estado = undValue($p->field_estado);
+      if($field_estado)
+        $field_estado = " - " . $field_estado . " - ";
+
+      $field_cep = undValue($p->field_cep);
+
+      $field_informacoes_complementares = undValue($p->field_informacoes_complementares);
+      $InfoComplementares = "";
+      if($field_informacoes_complementares){
+        $InfoComplementares = "<tr><td>";
+        $InfoComplementares .= "<b>Informações Complementares:</b><br>";
+        $InfoComplementares .= "$field_informacoes_complementares";
+        $InfoComplementares .= "</td></tr>";
+      }
+
+      $field_telefones = $p->field_telefones['und'];
+      $telefones = "Telefone(s): ";
+      foreach($field_telefones as $t){
+        $telefones .= $t['value'] . " - ";
+      }
+      $telefones = substr($telefones,0,-3) . "<br>";
+
+  /*
+  * Gerenciamento de Formacoes academicas
+  */
+  $FormacaoAcademica = "";
+  $formacoes = field_get_items('profile2', $p, 'field_formacao_academica');
+  if($formacoes){
+    $FormacaoAcademica = "<tr><td><b>FORMAÇÃO ACADÊMICA</b></td></tr>";
+    for($x=0;$x<count($formacoes);$x++){
+      $i = field_collection_field_get_entity($formacoes[$x]);
+
+      $FormacaoAcademica .= _tplFormacaoAcademica();
+
+      $field_grau_de_formacao = $field_formacao_grau = $field_formacao_ano = $field_formacao_instituicao = $field_formacao_nome_do_curso = "";
+
+      if($i->field_grau_de_formacao){
+        $field_grau_de_formacao = $i->field_grau_de_formacao['und'][0]['value'];
+
+        // Exibir label de acordo com a chave
+        // http://stackoverflow.com/questions/7731139/display-label-given-key-for-select-list
+        $key = $field_grau_de_formacao;
+        $field = field_info_field('field_grau_de_formacao');
+        $field_grau_de_formacao = $field['settings']['allowed_values'][$key];
+
+      }
+
+      if($i->field_formacao_grau && $i->field_formacao_grau['und'][0]['value'] == 1){
+        $field_formacao_grau = " (Concluído)";
+      } else {
+        $field_formacao_grau = " (Cursando)";
+      }
+
+      if($i->field_formacao_ano)
+        $field_formacao_ano = " - " . $i->field_formacao_ano['und'][0]['value'];
+
+      if($i->field_formacao_instituicao)
+        $field_formacao_instituicao = " - " . $i->field_formacao_instituicao['und'][0]['value'];
+
+      if($i->field_formacao_nome_do_curso)
+        $field_formacao_nome_do_curso = " - " . $i->field_formacao_nome_do_curso['und'][0]['value'];
+
+      $arrProcurar = array(
+        "@GrauDeFormacao",
+        "@NomeInstituicao",
+        "@NomeDoCurso",
+        "@AnoConclusao",
+        "@Status"
+        );
+      
+      $arrSubstituir = array(
+        $field_grau_de_formacao, // Ensino_Fundamental, Ensino_Medio, Graduacao, Pos_Graduacao, MBA, Mestrado, Doutorado, Pos_Doutorado
+        $field_formacao_instituicao,
+        $field_formacao_nome_do_curso,
+        $field_formacao_ano,
+        $field_formacao_grau, // 0:Cursando 1:Concluido
+        );
+
+      if($x%2 == 0){
+        $FormacaoAcademica .= "<br><br>";
+      }
+
+      $FormacaoAcademica = str_replace($arrProcurar, $arrSubstituir, $FormacaoAcademica);
+
+    }
+  }
+
+  /*
+  * Gerenciamento de experiencias profissionais
+  */
+  $Experiencias = "";
+
+  $exps = field_get_items('profile2', $p, 'field_experiencia');
+  if($exps){
+    $Experiencias = "<tr><td><b>EXPERIÊNCIA PROFISSIONAL</b></td></tr>";
+    for($i=0;$i<count($exps);$i++){
+      $item = field_collection_field_get_entity($exps[$i]);
+
+      $Experiencias .= _tplExperienciaProfissional();
+      
+      if($item->field_exp_nome_da_empresa)
+        $field_exp_nome_da_empresa = "<b>" . strtoupper($item->field_exp_nome_da_empresa['und'][0]['value']) . "</b>";
+      
+      if($item->field_exp_emprego_atual && ($item->field_exp_emprego_atual['und'][0]['value'] == 1)) 
+        $field_exp_data_de_saida   = "- Atual Emprego";
+
+      if($item->field_exp_data_de_entrada)
+        $field_exp_data_de_entrada = $item->field_exp_data_de_entrada['und'][0]['value'];
+
+      if($item->field_exp_data_de_saida && ($item->field_exp_data_de_saida['und'][0]['value']))
+        $field_exp_data_de_saida   = "/ " . $item->field_exp_data_de_saida['und'][0]['value'];
+
+      if($item->field_exp_ultimo_cargo)
+        $field_exp_ultimo_cargo    = "<b>Cargo: </b>" . $item->field_exp_ultimo_cargo['und'][0]['value'] . "</b>";
+
+      if($item->field_exp_atividades)
+        $field_exp_atividades      = $item->field_exp_atividades['und'][0]['value'];
+
+      $arrProcurar = array(
+        "@Empresa",
+        "@DtEntrada",
+        "@DtSaida",
+        "@UltimoCargo",
+        "@AtividadesDesenvolvidas"
+        );
+
+      $arrSubstituir = array(
+        $field_exp_nome_da_empresa, 
+        $field_exp_data_de_entrada,
+        $field_exp_data_de_saida,
+        $field_exp_ultimo_cargo,
+        $field_exp_atividades
+        );
+
+      $Experiencias = str_replace($arrProcurar, $arrSubstituir, $Experiencias);
+    }
+  }
+
+      $tpl  = "<table border=1 width='100%'>";
+      // Nome
+      $tpl .= "<tr><td>";
+      $tpl .= "<h1>$field_nome_completo</h1>";
+      $tpl .= "<td></tr>";
+
+      // Endereco
+      $tpl .= "<tr><td>";
+      $tpl .= "$field_endereco$field_numero$field_complemento$field_bairro$field_cidade$field_estado$field_cep<br>";
+      $tpl .= "$telefones";
+      $tpl .= "Nascimento: $field_data_de_nascimento<Br>";
+      $tpl .= "$field_nacionalidade$field_estado_civil<br>";
+      $tpl .= "Email: $user->mail<br>";
+      $tpl .= "</td></tr>";
+
+      $tpl .= $FormacaoAcademica;
+
+      $tpl .= $Experiencias;
+
+      $tpl .= $InfoComplementares;
+
+      $tpl .= "</table>";
+
+      print $tpl;
+
+    } // verificacao do campo nome
+
+  } // fim if types
+
+  /*
+  field_telefones (Array, 1 element)
+  field_experiencia (Array, 1 element)
+  field_filhos (Array, 1 element)
+  field_formacao_academica (Array, 1 element)
+  field_idioma_en (Array, 1 element)
+  field_idioma_es (Array, 1 element)
+  field_idioma_outro (Array, 1 element)
+  field_curso (Array, 1 element)
+  */
+
+}
+
+function undValue($entidade){
+  if( isset($entidade) && (!empty($entidade)) && (isset($entidade['und'])) && (!empty($entidade['und'])) && ($entidade['und'][0] != '') ){
+    $retorno = $entidade['und'][0]['value'];
+  } else { return ""; }
+  return $retorno;
+}
+
+function _tplExperienciaProfissional(){
+
+  $tpl  = "<tr>" .
+          "<td>@Empresa - @DtEntrada @DtSaida<br>" .
+          "@UltimoCargo<br><br>" .
+          "<b>Atividades Desenvolvidas</b><Br>@AtividadesDesenvolvidas" .
+          "</td>" .
+          "</tr>";
+
+  return $tpl;
+}
+
+function _tplFormacaoAcademica(){
+
+  $tpl = "<tr>"  .
+         "<td>"  .
+         "<b>@GrauDeFormacao</b>@NomeInstituicao@NomeDoCurso@AnoConclusao@Status" .
+         "</td>" .
+         "</tr>";
+
+  return $tpl;
+}

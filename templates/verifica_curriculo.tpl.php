@@ -1,0 +1,1 @@
+<p>adonai:<?php print_r($usuario); ?></p>
