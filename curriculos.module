@@ -350,6 +350,8 @@ function _tpl_Curriculo(){
     for($i=0;$i<count($exps);$i++){
       $item = field_collection_field_get_entity($exps[$i]);
 
+      $field_exp_nome_da_empresa = $field_exp_emprego_atual = $field_exp_data_de_entrada = $field_exp_data_de_saida = $field_exp_ultimo_cargo = $field_exp_atividades = "";
+
       $Experiencias .= _tplExperienciaProfissional();
       
       if($item->field_exp_nome_da_empresa)
@@ -388,7 +390,53 @@ function _tpl_Curriculo(){
 
       $Experiencias = str_replace($arrProcurar, $arrSubstituir, $Experiencias);
     }
-  }
+  } // Final de experiencias profissionais
+
+  /*
+  * Gerenciamento de Cursos
+  */
+  $Cursos = "";
+
+  $cursos = field_get_items('profile2', $p, 'field_curso');
+  if($cursos){
+    $Cursos = "<tr><td><b>CURSOS COMPLEMENTARES</b></td></tr>";
+    for($i=0;$i<count($cursos);$i++){
+      $item = field_collection_field_get_entity($cursos[$i]);
+
+      $Cursos .= _tplCursos();
+      
+      $field_nome_do_curso = $field_curso_instituicao = $field_curso_status = $field_curso_ano_conclusao = "";
+
+      if($item->field_nome_do_curso)
+        $field_nome_do_curso = $item->field_nome_do_curso['und'][0]['value']. " - " ;
+
+      if($item->field_curso_instituicao)
+        $field_curso_instituicao = $item->field_curso_instituicao['und'][0]['value'] . " - ";
+      
+      if($item->field_curso_status && ($item->field_curso_status['und'][0]['value'] == 1)){
+        $field_curso_status   = " (Concluído)";
+      } else { $field_curso_status = " (Cursando)"; }
+
+      if($item->field_curso_ano_conclusao)
+        $field_curso_ano_conclusao = " (" . $item->field_curso_ano_conclusao['und'][0]['value'] . ")";
+
+      $arrProcurar = array(
+        "@NomeCurso",
+        "@NomeInstituicao",
+        "@Status",
+        "@AnoConclusao",
+        );
+
+      $arrSubstituir = array(
+        $field_nome_do_curso,
+        $field_curso_instituicao,
+        $field_curso_status,
+        $field_curso_ano_conclusao,
+        );
+
+      $Cursos = str_replace($arrProcurar, $arrSubstituir, $Cursos);
+    }
+  } // Final de experiencias profissionais
 
       $tpl  = "<table border=1 width='100%'>";
       // Nome
@@ -406,6 +454,8 @@ function _tpl_Curriculo(){
       $tpl .= "</td></tr>";
 
       $tpl .= $FormacaoAcademica;
+
+      $tpl .= $Cursos;
 
       $tpl .= $Experiencias;
 
@@ -456,6 +506,17 @@ function _tplFormacaoAcademica(){
   $tpl = "<tr>"  .
          "<td>"  .
          "<b>@GrauDeFormacao</b>@NomeInstituicao@NomeDoCurso@AnoConclusao@Status" .
+         "</td>" .
+         "</tr>";
+
+  return $tpl;
+}
+
+function _tplCursos(){
+
+  $tpl = "<tr>"  .
+         "<td>"  .
+         "<b>@NomeCurso</b>@NomeInstituicao@Status@AnoConclusao" .
          "</td>" .
          "</tr>";
 
