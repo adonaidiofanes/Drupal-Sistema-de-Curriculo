@@ -223,7 +223,7 @@ function _tpl_Curriculo(){
        isset($p->field_nome_completo['und'][0]) &&
        isset($p->field_nome_completo['und'][0]['value'])  &&
        !empty($p->field_nome_completo['und'][0]['value'])
-      ){ 
+      ){
       // Variaveis
       $field_nome_completo = undValue($p->field_nome_completo);
       if(!$field_nome_completo){
@@ -274,169 +274,220 @@ function _tpl_Curriculo(){
       }
       $telefones = substr($telefones,0,-3) . "<br>";
 
-  /*
-  * Gerenciamento de Formacoes academicas
-  */
-  $FormacaoAcademica = "";
-  $formacoes = field_get_items('profile2', $p, 'field_formacao_academica');
-  if($formacoes){
-    $FormacaoAcademica = "<tr><td><b>FORMAÇÃO ACADÊMICA</b></td></tr>";
-    for($x=0;$x<count($formacoes);$x++){
-      $i = field_collection_field_get_entity($formacoes[$x]);
+    /*
+    * Gerenciamento de Formacoes academicas
+    */
+    $FormacaoAcademica = "";
+    $formacoes = field_get_items('profile2', $p, 'field_formacao_academica');
+    if($formacoes){
+      $FormacaoAcademica = "<tr><td><b>FORMAÇÃO ACADÊMICA</b></td></tr>";
+      for($x=0;$x<count($formacoes);$x++){
+        $i = field_collection_field_get_entity($formacoes[$x]);
 
-      $FormacaoAcademica .= _tplFormacaoAcademica();
+        $FormacaoAcademica .= _tplFormacaoAcademica();
 
-      $field_grau_de_formacao = $field_formacao_grau = $field_formacao_ano = $field_formacao_instituicao = $field_formacao_nome_do_curso = "";
+        $field_grau_de_formacao = $field_formacao_grau = $field_formacao_ano = $field_formacao_instituicao = $field_formacao_nome_do_curso = "";
 
-      if($i->field_grau_de_formacao){
-        $field_grau_de_formacao = $i->field_grau_de_formacao['und'][0]['value'];
+        if($i->field_grau_de_formacao){
+          $field_grau_de_formacao = $i->field_grau_de_formacao['und'][0]['value'];
 
-        // Exibir label de acordo com a chave
-        // http://stackoverflow.com/questions/7731139/display-label-given-key-for-select-list
-        $key = $field_grau_de_formacao;
-        $field = field_info_field('field_grau_de_formacao');
-        $field_grau_de_formacao = $field['settings']['allowed_values'][$key];
+          // Exibir label de acordo com a chave
+          // http://stackoverflow.com/questions/7731139/display-label-given-key-for-select-list
+          $key = $field_grau_de_formacao;
+          $field = field_info_field('field_grau_de_formacao');
+          $field_grau_de_formacao = $field['settings']['allowed_values'][$key];
+
+        }
+
+        if($i->field_formacao_grau && $i->field_formacao_grau['und'][0]['value'] == 1){
+          $field_formacao_grau = " (Concluído)";
+        } else {
+          $field_formacao_grau = " (Cursando)";
+        }
+
+        if($i->field_formacao_ano)
+          $field_formacao_ano = " - " . $i->field_formacao_ano['und'][0]['value'];
+
+        if($i->field_formacao_instituicao)
+          $field_formacao_instituicao = " - " . $i->field_formacao_instituicao['und'][0]['value'];
+
+        if($i->field_formacao_nome_do_curso)
+          $field_formacao_nome_do_curso = " - " . $i->field_formacao_nome_do_curso['und'][0]['value'];
+
+        $arrProcurar = array(
+          "@GrauDeFormacao",
+          "@NomeInstituicao",
+          "@NomeDoCurso",
+          "@AnoConclusao",
+          "@Status"
+          );
+        
+        $arrSubstituir = array(
+          $field_grau_de_formacao, // Ensino_Fundamental, Ensino_Medio, Graduacao, Pos_Graduacao, MBA, Mestrado, Doutorado, Pos_Doutorado
+          $field_formacao_instituicao,
+          $field_formacao_nome_do_curso,
+          $field_formacao_ano,
+          $field_formacao_grau, // 0:Cursando 1:Concluido
+          );
+
+        if($x%2 == 0){
+          $FormacaoAcademica .= "<br><br>";
+        }
+
+        $FormacaoAcademica = str_replace($arrProcurar, $arrSubstituir, $FormacaoAcademica);
 
       }
+    }
 
-      if($i->field_formacao_grau && $i->field_formacao_grau['und'][0]['value'] == 1){
-        $field_formacao_grau = " (Concluído)";
-      } else {
-        $field_formacao_grau = " (Cursando)";
+    /*
+    * Gerenciamento de experiencias profissionais
+    */
+    $Experiencias = "";
+
+    $exps = field_get_items('profile2', $p, 'field_experiencia');
+    if($exps){
+      $Experiencias = "<tr><td><b>EXPERIÊNCIA PROFISSIONAL</b></td></tr>";
+      for($i=0;$i<count($exps);$i++){
+        $item = field_collection_field_get_entity($exps[$i]);
+
+        $field_exp_nome_da_empresa = $field_exp_emprego_atual = $field_exp_data_de_entrada = $field_exp_data_de_saida = $field_exp_ultimo_cargo = $field_exp_atividades = "";
+
+        $Experiencias .= _tplExperienciaProfissional();
+        
+        if($item->field_exp_nome_da_empresa)
+          $field_exp_nome_da_empresa = "<b>" . strtoupper($item->field_exp_nome_da_empresa['und'][0]['value']) . "</b>";
+        
+        if($item->field_exp_emprego_atual && ($item->field_exp_emprego_atual['und'][0]['value'] == 1)) 
+          $field_exp_data_de_saida   = "- Atual Emprego";
+
+        if($item->field_exp_data_de_entrada)
+          $field_exp_data_de_entrada = $item->field_exp_data_de_entrada['und'][0]['value'];
+
+        if($item->field_exp_data_de_saida && ($item->field_exp_data_de_saida['und'][0]['value']))
+          $field_exp_data_de_saida   = "/ " . $item->field_exp_data_de_saida['und'][0]['value'];
+
+        if($item->field_exp_ultimo_cargo)
+          $field_exp_ultimo_cargo    = "<b>Cargo: </b>" . $item->field_exp_ultimo_cargo['und'][0]['value'] . "</b>";
+
+        if($item->field_exp_atividades)
+          $field_exp_atividades      = $item->field_exp_atividades['und'][0]['value'];
+
+        $arrProcurar = array(
+          "@Empresa",
+          "@DtEntrada",
+          "@DtSaida",
+          "@UltimoCargo",
+          "@AtividadesDesenvolvidas"
+          );
+
+        $arrSubstituir = array(
+          $field_exp_nome_da_empresa, 
+          $field_exp_data_de_entrada,
+          $field_exp_data_de_saida,
+          $field_exp_ultimo_cargo,
+          $field_exp_atividades
+          );
+
+        $Experiencias = str_replace($arrProcurar, $arrSubstituir, $Experiencias);
       }
+    } // Final de experiencias profissionais
 
-      if($i->field_formacao_ano)
-        $field_formacao_ano = " - " . $i->field_formacao_ano['und'][0]['value'];
+    /*
+    * Gerenciamento de Cursos
+    */
+    $Cursos = "";
 
-      if($i->field_formacao_instituicao)
-        $field_formacao_instituicao = " - " . $i->field_formacao_instituicao['und'][0]['value'];
+    $cursos = field_get_items('profile2', $p, 'field_curso');
+    if($cursos){
+      $Cursos = "<tr><td><b>CURSOS COMPLEMENTARES</b></td></tr>";
+      for($i=0;$i<count($cursos);$i++){
+        $item = field_collection_field_get_entity($cursos[$i]);
 
-      if($i->field_formacao_nome_do_curso)
-        $field_formacao_nome_do_curso = " - " . $i->field_formacao_nome_do_curso['und'][0]['value'];
+        $Cursos .= _tplCursos();
+        
+        $field_nome_do_curso = $field_curso_instituicao = $field_curso_status = $field_curso_ano_conclusao = "";
 
-      $arrProcurar = array(
-        "@GrauDeFormacao",
-        "@NomeInstituicao",
-        "@NomeDoCurso",
-        "@AnoConclusao",
-        "@Status"
-        );
-      
-      $arrSubstituir = array(
-        $field_grau_de_formacao, // Ensino_Fundamental, Ensino_Medio, Graduacao, Pos_Graduacao, MBA, Mestrado, Doutorado, Pos_Doutorado
-        $field_formacao_instituicao,
-        $field_formacao_nome_do_curso,
-        $field_formacao_ano,
-        $field_formacao_grau, // 0:Cursando 1:Concluido
-        );
+        if($item->field_nome_do_curso)
+          $field_nome_do_curso = $item->field_nome_do_curso['und'][0]['value']. " - " ;
 
-      if($x%2 == 0){
-        $FormacaoAcademica .= "<br><br>";
+        if($item->field_curso_instituicao)
+          $field_curso_instituicao = $item->field_curso_instituicao['und'][0]['value'] . " - ";
+        
+        if($item->field_curso_status && ($item->field_curso_status['und'][0]['value'] == 1)){
+          $field_curso_status   = " (Concluído)";
+        } else { $field_curso_status = " (Cursando)"; }
+
+        if($item->field_curso_ano_conclusao)
+          $field_curso_ano_conclusao = " (" . $item->field_curso_ano_conclusao['und'][0]['value'] . ")";
+
+        $arrProcurar = array(
+          "@NomeCurso",
+          "@NomeInstituicao",
+          "@Status",
+          "@AnoConclusao",
+          );
+
+        $arrSubstituir = array(
+          $field_nome_do_curso,
+          $field_curso_instituicao,
+          $field_curso_status,
+          $field_curso_ano_conclusao,
+          );
+
+        $Cursos = str_replace($arrProcurar, $arrSubstituir, $Cursos);
       }
+    } // Final de experiencias profissionais
 
-      $FormacaoAcademica = str_replace($arrProcurar, $arrSubstituir, $FormacaoAcademica);
+    /*
+    * Gerenciamento Idiomas
+    */
 
+    $Idioma = $Nivel_Ingles = $Nivel_Espanhol = $Idioma_Conteudo = "";
+
+    if($p->field_idioma_en  || $p->field_idioma_es || $p->field_idioma_outro){
+      $Idioma .= "<tr><td><b>IDIOMAS</b></td></tr>";
+      $Idioma .= _tplIdiomas();
     }
-  }
 
-  /*
-  * Gerenciamento de experiencias profissionais
-  */
-  $Experiencias = "";
-
-  $exps = field_get_items('profile2', $p, 'field_experiencia');
-  if($exps){
-    $Experiencias = "<tr><td><b>EXPERIÊNCIA PROFISSIONAL</b></td></tr>";
-    for($i=0;$i<count($exps);$i++){
-      $item = field_collection_field_get_entity($exps[$i]);
-
-      $field_exp_nome_da_empresa = $field_exp_emprego_atual = $field_exp_data_de_entrada = $field_exp_data_de_saida = $field_exp_ultimo_cargo = $field_exp_atividades = "";
-
-      $Experiencias .= _tplExperienciaProfissional();
-      
-      if($item->field_exp_nome_da_empresa)
-        $field_exp_nome_da_empresa = "<b>" . strtoupper($item->field_exp_nome_da_empresa['und'][0]['value']) . "</b>";
-      
-      if($item->field_exp_emprego_atual && ($item->field_exp_emprego_atual['und'][0]['value'] == 1)) 
-        $field_exp_data_de_saida   = "- Atual Emprego";
-
-      if($item->field_exp_data_de_entrada)
-        $field_exp_data_de_entrada = $item->field_exp_data_de_entrada['und'][0]['value'];
-
-      if($item->field_exp_data_de_saida && ($item->field_exp_data_de_saida['und'][0]['value']))
-        $field_exp_data_de_saida   = "/ " . $item->field_exp_data_de_saida['und'][0]['value'];
-
-      if($item->field_exp_ultimo_cargo)
-        $field_exp_ultimo_cargo    = "<b>Cargo: </b>" . $item->field_exp_ultimo_cargo['und'][0]['value'] . "</b>";
-
-      if($item->field_exp_atividades)
-        $field_exp_atividades      = $item->field_exp_atividades['und'][0]['value'];
-
-      $arrProcurar = array(
-        "@Empresa",
-        "@DtEntrada",
-        "@DtSaida",
-        "@UltimoCargo",
-        "@AtividadesDesenvolvidas"
-        );
-
-      $arrSubstituir = array(
-        $field_exp_nome_da_empresa, 
-        $field_exp_data_de_entrada,
-        $field_exp_data_de_saida,
-        $field_exp_ultimo_cargo,
-        $field_exp_atividades
-        );
-
-      $Experiencias = str_replace($arrProcurar, $arrSubstituir, $Experiencias);
+    if($p->field_idioma_en){
+      $field = field_info_field('field_idioma_en');
+      $Nivel_Ingles = $field['settings']['allowed_values'][$p->field_idioma_en['und'][0]['value']];
+      if($Nivel_Ingles != "Nenhum"){
+        $Idioma_Conteudo = "Inglês: " . $Nivel_Ingles . "<br>";
+      }
     }
-  } // Final de experiencias profissionais
 
-  /*
-  * Gerenciamento de Cursos
-  */
-  $Cursos = "";
-
-  $cursos = field_get_items('profile2', $p, 'field_curso');
-  if($cursos){
-    $Cursos = "<tr><td><b>CURSOS COMPLEMENTARES</b></td></tr>";
-    for($i=0;$i<count($cursos);$i++){
-      $item = field_collection_field_get_entity($cursos[$i]);
-
-      $Cursos .= _tplCursos();
-      
-      $field_nome_do_curso = $field_curso_instituicao = $field_curso_status = $field_curso_ano_conclusao = "";
-
-      if($item->field_nome_do_curso)
-        $field_nome_do_curso = $item->field_nome_do_curso['und'][0]['value']. " - " ;
-
-      if($item->field_curso_instituicao)
-        $field_curso_instituicao = $item->field_curso_instituicao['und'][0]['value'] . " - ";
-      
-      if($item->field_curso_status && ($item->field_curso_status['und'][0]['value'] == 1)){
-        $field_curso_status   = " (Concluído)";
-      } else { $field_curso_status = " (Cursando)"; }
-
-      if($item->field_curso_ano_conclusao)
-        $field_curso_ano_conclusao = " (" . $item->field_curso_ano_conclusao['und'][0]['value'] . ")";
-
-      $arrProcurar = array(
-        "@NomeCurso",
-        "@NomeInstituicao",
-        "@Status",
-        "@AnoConclusao",
-        );
-
-      $arrSubstituir = array(
-        $field_nome_do_curso,
-        $field_curso_instituicao,
-        $field_curso_status,
-        $field_curso_ano_conclusao,
-        );
-
-      $Cursos = str_replace($arrProcurar, $arrSubstituir, $Cursos);
+    if($p->field_idioma_es){
+      $field = field_info_field('field_idioma_es');
+      $Nivel_Espanhol = $field['settings']['allowed_values'][$p->field_idioma_es['und'][0]['value']];
+      if($Nivel_Espanhol != "Nenhum"){
+        $Idioma_Conteudo .= "Espanhol: " . $Nivel_Espanhol . "<br>";
+      }
     }
-  } // Final de experiencias profissionais
+
+    $idiomas = field_get_items('profile2', $p, 'field_idioma_outro');
+    if($idiomas){
+      for($i=0;$i<count($idiomas);$i++){
+        $item = field_collection_field_get_entity($idiomas[$i]);
+
+        if($item->field_idioma_outro_nome)
+          $field_idioma_outro_nome = $item->field_idioma_outro_nome['und'][0]['value']. ": " ;
+
+        if($item->field_idioma_outro_nivel){
+          $field_idioma_outro_nivel = $item->field_idioma_outro_nivel['und'][0]['value'];
+          $field = field_info_field('field_idioma_outro_nivel');
+          $field_idioma_outro_nivel = $field['settings']['allowed_values'][$field_idioma_outro_nivel];
+        }
+
+        if($field_idioma_outro_nivel && $field_idioma_outro_nivel){
+          $Idioma_Conteudo .= $field_idioma_outro_nome.$field_idioma_outro_nivel;
+        }
+      }
+    } // Final de Idioma_Outros
+
+    if($Idioma_Conteudo) != ""){
+      $Idioma = str_replace("@IdiomaGeral", $Idioma_Conteudo, $Idioma);
+    }
 
       $tpl  = "<table border=1 width='100%'>";
       // Nome
@@ -455,6 +506,8 @@ function _tpl_Curriculo(){
 
       $tpl .= $FormacaoAcademica;
 
+      $tpl .= $Idioma;
+
       $tpl .= $Cursos;
 
       $tpl .= $Experiencias;
@@ -468,17 +521,6 @@ function _tpl_Curriculo(){
     } // verificacao do campo nome
 
   } // fim if types
-
-  /*
-  field_telefones (Array, 1 element)
-  field_experiencia (Array, 1 element)
-  field_filhos (Array, 1 element)
-  field_formacao_academica (Array, 1 element)
-  field_idioma_en (Array, 1 element)
-  field_idioma_es (Array, 1 element)
-  field_idioma_outro (Array, 1 element)
-  field_curso (Array, 1 element)
-  */
 
 }
 
@@ -517,6 +559,17 @@ function _tplCursos(){
   $tpl = "<tr>"  .
          "<td>"  .
          "<b>@NomeCurso</b>@NomeInstituicao@Status@AnoConclusao" .
+         "</td>" .
+         "</tr>";
+
+  return $tpl;
+}
+
+function _tplIdiomas(){
+
+  $tpl = "<tr>"  .
+         "<td>"  .
+         "@IdiomaGeral" .
          "</td>" .
          "</tr>";
 
