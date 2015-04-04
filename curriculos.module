@@ -485,7 +485,7 @@ function _tpl_Curriculo(){
       }
     } // Final de Idioma_Outros
 
-    if($Idioma_Conteudo) != ""){
+    if($Idioma_Conteudo != ""){
       $Idioma = str_replace("@IdiomaGeral", $Idioma_Conteudo, $Idioma);
     }
 
@@ -521,6 +521,7 @@ function _tpl_Curriculo(){
     } // verificacao do campo nome
 
   } // fim if types
+
 
 }
 
