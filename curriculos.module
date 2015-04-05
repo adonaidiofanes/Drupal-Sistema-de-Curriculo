@@ -21,7 +21,7 @@ function curriculos_menu() {
 }
 
 /**
- * Implements _page_adm_curriculos().
+ * Implements curriculos_init().
  */
 function curriculos_init(){
   global $base_url;
@@ -56,7 +56,9 @@ function page_enviar_curriculo(){
     // Set message sucesso ou erro
     $nid = arg(1);
     $uid = $user->uid;
-    echo "Nid:" . $nid . " - Uid:" . $uid;
+    //echo "Nid:" . $nid . " - Uid:" . $uid;
+    enviar_curriculo($nid);
+
   } else {
     // Enviar para login
     // Set message cadastre-se | Status: 'status','warning','error'
@@ -71,10 +73,67 @@ function page_enviar_curriculo(){
 /**
  * Implements enviar_curriculo().
  */
-function enviar_curriculo(){
+function enviar_curriculo($nid){
   // @TODO: Enviar curriculo para o email cadastrado pela vaga
   // @TODO: Selecionar TPL do curriculo do usuario
   // @TODO: Setar mensagem de enviado com sucesso
+  // @TODO: Pegar o nome do candidato no profile, e colocar no $assunto o nome dele
+  // @TODO: Adicionar um INSERT no BD, detalhando a vaga e UID foram enviados
+
+  $node = node_load($nid);
+  //dsm($node);
+
+  $email_destino = $assunto = "Currículo";
+
+  if($node->field_email && ($node->field_email['und'][0]['email']))
+    $email_destino = $node->field_email['und'][0]['email'];
+
+  if($node->field_assunto && ($node->field_assunto['und'][0]['value']))
+    $assunto = $node->field_assunto['und'][0]['value'];
+
+  drupal_set_message('Enviando email');
+  watchdog('curriculos', 'Curriculo enviado: %para', array('%para' => $email_destino), WATCHDOG_NOTICE, $link = NULL);
+
+  $module = 'curriculos';
+  $key = 'key';
+  $language = language_default();
+  $params = array();
+  $from = NULL;
+  $send = FALSE;
+  //$to = $form['detalhes']['email']['#value'];
+  $to = $email_destino;
+
+  $message = drupal_mail($module, $key, $to, $language, $params, $from, $send);
+
+  //$message['subject'] = $form['detalhes']['titulo']['#value'];
+  $message['subject'] = $assunto;
+  $message['body'] = array();
+  //$message['body'][] = $form['detalhes']['texto_html']['#value'];
+  $message['body'][] = _tpl_Curriculo();
+
+  $headers = array(
+    'MIME-Version' => '1.0',
+    'Content-Type' => 'text/html; charset=UTF-8; format=flowed',
+    'Content-Transfer-Encoding' => '8Bit',
+    'X-Mailer' => 'Drupal',
+  );
+
+  foreach ($headers as $key => $value) {
+    $message['headers'][$key] = $value;
+  }
+
+  // Retrieve the responsible implementation for this message.
+  $system = drupal_mail_system($module, $key);
+
+  // Format the message body.
+  $message = $system->format($message);
+
+  // Send e-mail.
+  $message['result'] = $system->mail($message);
+  //drupal_set_message("message[result]: " . $message['result']);
+
+  drupal_goto("node/".$nid);
+
 }
 
 /**
@@ -178,6 +237,10 @@ function _tpl_Bt_Cv_Enviar($vars){
   return $tpl;
 }
 
+/*
+* Implements _tpl_Padrao_Vaga()
+* Essa e a tpl responsavel pela exibicao da vaga de emprego
+*/
 function _tpl_Padrao_Vaga($node){
   
   # Titulo
@@ -535,13 +598,11 @@ function _tpl_Curriculo(){
 
       $tpl .= "</table>";
 
-      print $tpl;
+      return $tpl;
 
     } // verificacao do campo nome
 
   } // fim if types
-
-
 }
 
 function undValue($entidade){
