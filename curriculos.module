@@ -24,13 +24,12 @@ function curriculos_menu() {
  * Implements curriculos_init().
  */
 function curriculos_init(){
-  global $base_url;
   $module_path = drupal_get_path('module', 'curriculos');
 
-  if (strpos(request_uri(),'/user') !== false) {
-    drupal_add_css($module_path . "/css/curriculos.css");
-    drupal_add_js($module_path . "/js/curriculos.js");
-  } 
+  // Adicionar CSS padrao do modulo
+  drupal_add_css($module_path . "/css/curriculos.css");
+  // Adicionar JS padrado do modulo 
+  drupal_add_js($module_path . "/js/curriculos.js");
 }
 
 /**
@@ -268,14 +267,14 @@ function curriculos_registrar_envio($nid, $uid){
 }
 
 function _tpl_Bt_Cv_Enviado(){
-  $tpl  = "<div>";
+  $tpl  = "<div";
   $tpl .= '<button type="button" class="btn btn-default btn-lg btn-danger navbar-btn disabled"><i class="glyphicon glyphicon-ok"></i> Currículo já enviado!</button>';
   $tpl .= "</div>";
   return $tpl;
 }
 function _tpl_Bt_Cv_Enviar($vars){
   global $base_url;
-  $tpl  = "<div>";
+  $tpl  = "<div id='enviar_cv'>";
   $tpl .= "<form action='$base_url/enviar_curriculo/$vars[nid]/'>";
   $tpl .= '<button type="submit" class="btn btn-default btn-lg btn-success"><i class="glyphicon glyphicon-send"></i> Enviar Currículo</button>';
   $tpl .= "</form>";
