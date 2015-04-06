@@ -28,12 +28,9 @@ function curriculos_init(){
   $module_path = drupal_get_path('module', 'curriculos');
 
   if (strpos(request_uri(),'/user') !== false) {
-  
-    //drupal_add_css($base_url . '/' . $module_path . "/css/global.css");
-    drupal_add_css($module_path . "/css/global.css");
-
+    drupal_add_css($module_path . "/css/curriculos.css");
+    drupal_add_js($module_path . "/js/curriculos.js");
   } 
-
 }
 
 /**
@@ -49,14 +46,14 @@ function page_adm_curriculos(){
 function page_enviar_curriculo(){
   global $user;
   global $base_url;
-  //drupal_goto('node', array(arg(1)));
 
+  // Se o usuario estiver logado
   if(!user_is_anonymous()){
-    // @TODO: Cadastrar curriculo
     // Set message sucesso ou erro
     $nid = arg(1);
     $uid = $user->uid;
-    //echo "Nid:" . $nid . " - Uid:" . $uid;
+    
+    // Enviar curriculo
     enviar_curriculo($nid);
 
   } else {
@@ -76,8 +73,6 @@ function page_enviar_curriculo(){
 function enviar_curriculo($nid){
   // Carrega o curriculo do usuario ativo no momento e envia para o email cadastrado no sistema
   // O email eh pego pelo $nid
-
-  // @TODO: Adicionar um INSERT no BD, detalhando a vaga e UID foram enviados
 
   // Pegar dados do usuario logado!
   global $user;
@@ -162,7 +157,7 @@ function enviar_curriculo($nid){
     watchdog('curriculos', 'Curriculo enviado: %de -> %para', array('%de' => $user->mail, '%para' => $email_destino), WATCHDOG_NOTICE, $link = NULL);
     drupal_set_message("<i class='glyphicon glyphicon-ok'></i> Curriculo enviado com sucesso!<br><i class='glyphicon glyphicon-thumbs-up'></i> Vamos torcer para que a empresa entre em contato!");
 
-    // Inserir na BD o registro na tabela Curriculos
+    // Adicionar um INSERT no BD, detalhando a vaga e UID foram enviados
     curriculos_registrar_envio($nid, $user->uid);
 
   } else {
