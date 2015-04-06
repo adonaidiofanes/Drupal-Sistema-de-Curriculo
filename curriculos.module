@@ -74,16 +74,42 @@ function page_enviar_curriculo(){
  * Implements enviar_curriculo().
  */
 function enviar_curriculo($nid){
-  // @TODO: Enviar curriculo para o email cadastrado pela vaga
-  // @TODO: Selecionar TPL do curriculo do usuario
-  // @TODO: Setar mensagem de enviado com sucesso
-  // @TODO: Pegar o nome do candidato no profile, e colocar no $assunto o nome dele
+  // Carrega o curriculo do usuario ativo no momento e envia para o email cadastrado no sistema
+  // O email eh pego pelo $nid
+
   // @TODO: Adicionar um INSERT no BD, detalhando a vaga e UID foram enviados
 
-  $node = node_load($nid);
-  //dsm($node);
+  // Pegar dados do usuario logado!
+  global $user;
+  $types = profile2_get_types();
 
-  $email_destino = $assunto = "Currículo";
+  if( ($types) && (!empty($types)) && (isset($types['curriculo'])) && ($types['curriculo']->type == 'curriculo') )
+  {
+
+    $p = profile2_load_by_user($user->uid, $types['curriculo']->type);
+    
+    // Verificar se existe o campo nome
+    if(isset($p->field_nome_completo) && (isset($p->field_nome_completo['und'])) &&
+       isset($p->field_nome_completo['und']) &&
+       isset($p->field_nome_completo['und'][0]) &&
+       isset($p->field_nome_completo['und'][0]['value'])  &&
+       !empty($p->field_nome_completo['und'][0]['value']) )
+    {
+      // Variaveis
+      $Candidato_Nome = undValue($p->field_nome_completo);
+      $Candidato_Email = $user->mail;
+      if(!$Candidato_Nome){
+        drupal_set_message('Ocorreu um erro crítico! Entre em contato conosco através do formulário de contato!','error');
+      }
+    }
+  }
+
+  $node = node_load($nid);
+
+  $email_destino = "";
+
+  // Pegar o nome do candidato no profile, e colocar no $assunto o nome dele
+  $assunto = "Currículo: $Candidato_Nome";
 
   if($node->field_email && ($node->field_email['und'][0]['email']))
     $email_destino = $node->field_email['und'][0]['email'];
@@ -91,24 +117,22 @@ function enviar_curriculo($nid){
   if($node->field_assunto && ($node->field_assunto['und'][0]['value']))
     $assunto = $node->field_assunto['und'][0]['value'];
 
-  drupal_set_message('Enviando email');
-  watchdog('curriculos', 'Curriculo enviado: %para', array('%para' => $email_destino), WATCHDOG_NOTICE, $link = NULL);
-
   $module = 'curriculos';
   $key = 'key';
   $language = language_default();
   $params = array();
   $from = NULL;
   $send = FALSE;
-  //$to = $form['detalhes']['email']['#value'];
+  
   $to = $email_destino;
 
   $message = drupal_mail($module, $key, $to, $language, $params, $from, $send);
 
-  //$message['subject'] = $form['detalhes']['titulo']['#value'];
   $message['subject'] = $assunto;
+
   $message['body'] = array();
-  //$message['body'][] = $form['detalhes']['texto_html']['#value'];
+
+  // Selecionar TPL do curriculo do usuario
   $message['body'][] = _tpl_Curriculo();
 
   $headers = array(
@@ -116,6 +140,7 @@ function enviar_curriculo($nid){
     'Content-Type' => 'text/html; charset=UTF-8; format=flowed',
     'Content-Transfer-Encoding' => '8Bit',
     'X-Mailer' => 'Drupal',
+    'Reply-To' => $user->mail, // Ao responder, responder para o usuario que enviou o email
   );
 
   foreach ($headers as $key => $value) {
@@ -130,7 +155,21 @@ function enviar_curriculo($nid){
 
   // Send e-mail.
   $message['result'] = $system->mail($message);
-  //drupal_set_message("message[result]: " . $message['result']);
+
+  // Se o email foi enviado com sucesso!
+  if($message['result'] == 1){
+    // Mensagem: Sucesso ao enviar CV
+    watchdog('curriculos', 'Curriculo enviado: %de -> %para', array('%de' => $user->mail, '%para' => $email_destino), WATCHDOG_NOTICE, $link = NULL);
+    drupal_set_message("<i class='glyphicon glyphicon-ok'></i> Curriculo enviado com sucesso!<br><i class='glyphicon glyphicon-thumbs-up'></i> Vamos torcer para que a empresa entre em contato!");
+
+    // Inserir na BD o registro na tabela Curriculos
+    curriculos_registrar_envio($nid, $user->uid);
+
+  } else {
+    // Erro ao enviar CV
+    watchdog('curriculos', 'Erro ao enviar: %de -> %para ! Nid: %nid', array('%de' => $user->mail, '%para' => $email_destino, '%nid' => $nid), WATCHDOG_CRITICAL, $link = NULL);
+    drupal_set_message("<i class='glyphicon glyphicon-exclamation-sign'></i> Ocorreu um erro ao enviar o curriculo! Entre em contato conosco através do formulário de contato, informando o código da vaga: @nid ", array('@nid' => $nid),  'error');
+  }
 
   drupal_goto("node/".$nid);
 
@@ -208,7 +247,6 @@ function curriculos_uninstall(){
 */
 
 function verificar_se_cv_foi_enviado($vars){
-
   $result = db_query("SELECT * FROM {curriculos} WHERE nid = :nid AND uid = :uid", array(':nid' => $vars['nid'], ':uid' => $vars['uid']));
   $contaCadastro = $result->rowCount();
 
@@ -225,15 +263,28 @@ function verificar_se_cv_foi_enviado($vars){
   } 
 }
 
+function curriculos_registrar_envio($nid, $uid){
+  $id = db_insert('curriculos')
+    ->fields(array(
+        'nid' => $nid,
+        'uid' => $uid,
+  ))->execute();
+  watchdog('curriculos', "Curriculo gravado no BD : NID[$nid] UID[$uid]");
+}
+
 function _tpl_Bt_Cv_Enviado(){
-  $tpl = '<button type="button" class="btn btn-default btn-lg btn-danger navbar-btn disabled"><i class="glyphicon glyphicon-ok"></i> Currículo já enviado!</button>';
+  $tpl  = "<div>";
+  $tpl .= '<button type="button" class="btn btn-default btn-lg btn-danger navbar-btn disabled"><i class="glyphicon glyphicon-ok"></i> Currículo já enviado!</button>';
+  $tpl .= "</div>";
   return $tpl;
 }
 function _tpl_Bt_Cv_Enviar($vars){
   global $base_url;
-  $tpl  = "<form action='$base_url/enviar_curriculo/$vars[nid]/'>";
+  $tpl  = "<div>";
+  $tpl .= "<form action='$base_url/enviar_curriculo/$vars[nid]/'>";
   $tpl .= '<button type="submit" class="btn btn-default btn-lg btn-success"><i class="glyphicon glyphicon-send"></i> Enviar Currículo</button>';
   $tpl .= "</form>";
+  $tpl .= "</div>";
   return $tpl;
 }
 
@@ -410,10 +461,6 @@ function _tpl_Curriculo(){
             $field_formacao_ano,
             $field_formacao_grau, // 0:Cursando 1:Concluido
             );
-
-          if($x%2 == 0){
-            $FormacaoAcademica .= "<br><br>";
-          }
 
           $FormacaoAcademica = str_replace($arrProcurar, $arrSubstituir, $FormacaoAcademica);
 
