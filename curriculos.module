@@ -58,7 +58,7 @@ function page_enviar_curriculo(){
   } else {
     // Enviar para login
     // Set message cadastre-se | Status: 'status','warning','error'
-    drupal_set_message(t('Você deve estar logado para enviar currículos!<br>Cadastre-se no formulário abaixo.'), 'error');
+    drupal_set_message(t('<i class="glyphicon glyphicon-arrow-down"></i> Cadastre seu currículo grátis no formulário abaixo.'), 'error');
     drupal_goto($base_url . '/user/register');
     // @TODO: Gravar o node do camarada em uma sessao e:
     // * Após ele logar, se ele tiver cadastro envie o CV
@@ -205,6 +205,28 @@ function curriculos_schema(){
 }
 
 /**
+ * Implements hook_user_insert().
+ */
+//function curriculos_user_insert(&$edit, $account, $category) {
+//function curriculos_user_presave(&$edit, $account, $category) {
+  /* Fonte: http://stackoverflow.com/questions/7329374/how-to-let-users-select-their-roles-on-registration-in-drupal-7
+  $role = "Candidato"; // or any role name that you want the role id for
+  $roles_table = user_roles(); // loads the roles table into an array
+  $rid = array_search($role, $roles_table); // where $rid == the role id of the $role variable name.
+
+  if ($account->is_new){
+    echo "Sou novo'";
+    $uid = $account['uid'];// User ID of user that you want to add role to.
+    $role_name = 'Candidato'; // The name of the role to add.
+    if ($role = user_role_load_by_name($role_name)) {
+      user_multiple_role_edit(array($uid), 'add_role', $role->rid);
+    }
+  }
+//exit();
+  */
+//}
+
+/**
  * Implements hook_uninstall().
  */
 /*
@@ -245,7 +267,7 @@ function verificar_se_cv_foi_enviado($vars){
   $contaCadastro = $result->rowCount();
 
   // Verificar se temos email cadastrado para essa vaga
-  if(isset($vars['email']) && (!empty($vars['email']['und'][0]))){
+  if(isset($vars['email']) && (!empty($vars['email']['und'][0])) && ($vars['email']['und'][0]['email'] != "")){
     // Adicionar botao de enviar CV
     if($contaCadastro > 0){
       // Botao Cv ja enviado
@@ -468,8 +490,10 @@ function _tpl_Curriculo(){
 
       $exps = field_get_items('profile2', $p, 'field_experiencia');
       if($exps){
-        $Experiencias = "<tr><td class='curriculo_categoria'><b>EXPERIÊNCIA PROFISSIONAL</b></td></tr>";
+
+        $Experiencias = "<tr><td class='curriculo_categoria'><b>EXPERIÊNCIA PROFISSIONAL</b><br><br></td></tr>";
         for($i=0;$i<count($exps);$i++){
+
           $item = field_collection_field_get_entity($exps[$i]);
 
           $field_exp_nome_da_empresa = $field_exp_emprego_atual = $field_exp_data_de_entrada = $field_exp_data_de_saida = $field_exp_ultimo_cargo = $field_exp_atividades = "";
@@ -510,9 +534,11 @@ function _tpl_Curriculo(){
             $field_exp_atividades
             );
 
-          $Experiencias = str_replace($arrProcurar, $arrSubstituir, $Experiencias);
+          $Experiencias = str_replace($arrProcurar, $arrSubstituir, $Experiencias) . $hr;
         }
       } // Final de experiencias profissionais
+
+      if(strlen($Experiencias) < 182){ $Experiencias = ""; }
 
       /*
       * Gerenciamento de Cursos
@@ -556,9 +582,9 @@ function _tpl_Curriculo(){
             $field_curso_ano_conclusao,
             );
 
-          $Cursos = str_replace($arrProcurar, $arrSubstituir, $Cursos);
+          $Cursos = str_replace($arrProcurar, $arrSubstituir, $Cursos) . $hr;
         }
-      } // Final de experiencias profissionais
+      } else { $Cursos = ""; } // Final de experiencias profissionais
 
       /*
       * Gerenciamento Idiomas
@@ -566,7 +592,10 @@ function _tpl_Curriculo(){
 
       $Idioma = $Nivel_Ingles = $Nivel_Espanhol = $Idioma_Conteudo = "";
 
-      if($p->field_idioma_en  || $p->field_idioma_es || $p->field_idioma_outro){
+      if(($p->field_idioma_en  || $p->field_idioma_es || $p->field_idioma_outro)
+        && (!empty($p->field_idioma_en['und'][0]['value'])  || !empty($p->field_idioma_es['und'][0]['value']) || !empty($p->field_idioma_outro['und'][0]['value']))
+        && (($p->field_idioma_en['und'][0]['value']!="")  || ($p->field_idioma_es['und'][0]['value']!="") || ($p->field_idioma_outro['und'][0]['value']!=""))
+        ){
         $Idioma .= "<tr><td class='curriculo_categoria'><b>IDIOMAS</b></td></tr>";
         $Idioma .= _tplIdiomas();
       }
@@ -601,14 +630,16 @@ function _tpl_Curriculo(){
             $field_idioma_outro_nivel = $field['settings']['allowed_values'][$field_idioma_outro_nivel];
           }
 
-          if($field_idioma_outro_nivel && $field_idioma_outro_nivel){
+          if($field_idioma_outro_nivel && $field_idioma_outro_nivel != ""){
             $Idioma_Conteudo .= $field_idioma_outro_nome.$field_idioma_outro_nivel;
           }
         }
       } // Final de Idioma_Outros
 
-      if($Idioma_Conteudo != ""){
-        $Idioma = str_replace("@IdiomaGeral", $Idioma_Conteudo, $Idioma);
+      if($Idioma_Conteudo != "" && (!empty($Idioma_Conteudo)) && (strlen($Idioma_Conteudo)>1)){
+        $Idioma = str_replace("@IdiomaGeral", $Idioma_Conteudo, $Idioma) . $hr;
+      } else {
+        $Idioma = "";
       }
 
       $tpl  = "<table width='100%' id='curriculo_usuario'>";
@@ -629,13 +660,13 @@ function _tpl_Curriculo(){
       $tpl .= $hr . $FormacaoAcademica . $hr;
       
 
-      $tpl .= $Idioma . $hr;
+      $tpl .= $Idioma;
 
-      $tpl .= $Cursos . $hr;
+      $tpl .= $Cursos;
 
-      $tpl .= $Experiencias . $hr;
+      $tpl .= $Experiencias;
 
-      $tpl .= $InfoComplementares . $hr;
+      $tpl .= $InfoComplementares;
 
       $tpl .= "</table>";
 
