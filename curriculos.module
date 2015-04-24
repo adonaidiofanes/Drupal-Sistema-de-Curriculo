@@ -95,6 +95,11 @@ function enviar_curriculo($nid){
       if(!$Candidato_Nome){
         drupal_set_message('Ocorreu um erro crítico! Entre em contato conosco através do formulário de contato!','error');
       }
+    } else { 
+      // Caso o usuario nao tenha curriculo cadastrado
+      // Redireiconar usuario para pagina de cadastro de curriculo
+      drupal_set_message("<i class='glyphicon glyphicon-floppy-save'></i> Você deve cadastrar seu currículo!", "error");
+      drupal_goto("user/$user->uid/edit/curriculo");
     }
   }
 
@@ -203,28 +208,6 @@ function curriculos_schema(){
 
   return $schema;
 }
-
-/**
- * Implements hook_user_insert().
- */
-//function curriculos_user_insert(&$edit, $account, $category) {
-//function curriculos_user_presave(&$edit, $account, $category) {
-  /* Fonte: http://stackoverflow.com/questions/7329374/how-to-let-users-select-their-roles-on-registration-in-drupal-7
-  $role = "Candidato"; // or any role name that you want the role id for
-  $roles_table = user_roles(); // loads the roles table into an array
-  $rid = array_search($role, $roles_table); // where $rid == the role id of the $role variable name.
-
-  if ($account->is_new){
-    echo "Sou novo'";
-    $uid = $account['uid'];// User ID of user that you want to add role to.
-    $role_name = 'Candidato'; // The name of the role to add.
-    if ($role = user_role_load_by_name($role_name)) {
-      user_multiple_role_edit(array($uid), 'add_role', $role->rid);
-    }
-  }
-//exit();
-  */
-//}
 
 /**
  * Implements hook_uninstall().
