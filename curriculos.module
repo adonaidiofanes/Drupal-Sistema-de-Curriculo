@@ -210,6 +210,41 @@ function curriculos_schema(){
 }
 
 /**
+ * Implements hook_block_info().
+ */
+function curriculos_block_info() {
+  $blocks['curriculos_editar_cv'] = array(
+    'info' => t('Curriculos - Editar meu currículo'),
+    'cache' => DRUPAL_NO_CACHE
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function curriculos_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'curriculos_editar_cv':
+      $block['subject'] = t('Editar meu currículo');
+      $block['content'] = _blc_editar_cv();
+      break;
+    
+  }
+  return $block;
+}
+
+function _blc_editar_cv(){
+  global $user, $base_url;
+  $destination = current_path();
+  $output = "<span class='btn btn-primary btn-lg'><a href='$base_url/user/$user->uid/edit/curriculo?destination=$destination' style='color:#FFFFFF;''><i class='glyphicon glyphicon-pencil'></i> Editar meu Currículo</a></span>";
+  return $output;
+}
+
+/**
  * Implements hook_uninstall().
  */
 /*
