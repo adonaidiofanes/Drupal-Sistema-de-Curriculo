@@ -215,7 +215,12 @@ function curriculos_schema(){
 function curriculos_block_info() {
   $blocks['curriculos_editar_cv'] = array(
     'info' => t('Curriculos - Editar meu currículo'),
-    'cache' => DRUPAL_NO_CACHE
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['curriculos_cadastrar'] = array(
+    'info' => t('Currículos - Cadastrar Currículo'),
+    'cache' => DRUPAL_NO_CACHE,
   );
 
   return $blocks;
@@ -232,7 +237,10 @@ function curriculos_block_view($delta = '') {
       $block['subject'] = t('Editar meu currículo');
       $block['content'] = _blc_editar_cv();
       break;
-    
+    case 'curriculos_cadastrar':
+      $block['content'] = t('Cadastre seu currículo');
+      $block['content'] = _blc_cadastrar_cv();
+      break;
   }
   return $block;
 }
@@ -242,6 +250,24 @@ function _blc_editar_cv(){
   $destination = current_path();
   $output = "<span class='btn btn-primary btn-lg'><a href='$base_url/user/$user->uid/edit/curriculo?destination=$destination' style='color:#FFFFFF;''><i class='glyphicon glyphicon-pencil'></i> Editar meu Currículo</a></span>";
   return $output;
+}
+
+function _blc_cadastrar_cv(){
+  $output = "<span class='btn btn-success btn-lg'><a href='http://www.procurandoemprego.net/user/register' style='color:#FFFFFF;'>Cadastrar currículo grátis</a></span>";
+  return $output;
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function curriculos_user_login(&$edit, $account) {
+  // If the user has a NULL time zone, notify them to set a time zone.
+  /*
+   *if (!$user->timezone && variable_get('configurable_timezones', 1) && variable_get('empty_timezone_message', 0)) {
+   *  drupal_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$user->uid/edit", array('query' => drupal_get_destination(), 'fragment' => 'edit-timezone')))));
+   *}
+   */
+  /* Your code here */
 }
 
 /**
