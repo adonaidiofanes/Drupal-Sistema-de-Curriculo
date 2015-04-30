@@ -258,6 +258,26 @@ function _blc_cadastrar_cv(){
 }
 
 /**
+ * Implements hook_form_alter().
+ */
+function curriculos_form_alter(&$form, &$form_state, $form_id) {
+  /*
+   *if (isset($form['type']) && $form['type']['#value'] . '_node_settings' == $form_id) {
+   *  $form['workflow']['upload_' . $form['type']['#value']] = array(
+   *    '#type' => 'radios',
+   *    '#title' => t('Attachments'),
+   *    '#default_value' => variable_get('upload_' . $form['type']['#value'], 1),
+   *    '#options' => array(t('Disabled'), t('Enabled')),
+   * );
+   *}
+   */
+  if(isset($form_state['view']) && $form_state['view']->name == 'vagas') {
+    $form['estado']['#options']['All'] = t('- Selecione -'); // overrides <All> on the dropdown
+
+  }
+}
+
+/**
  * Implements hook_user_login().
  */
 function curriculos_user_login(&$edit, $account) {
