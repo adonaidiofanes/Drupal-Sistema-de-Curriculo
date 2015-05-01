@@ -273,8 +273,23 @@ function curriculos_form_alter(&$form, &$form_state, $form_id) {
    */
   if(isset($form_state['view']) && $form_state['view']->name == 'vagas') {
     $form['estado']['#options']['All'] = t('- Selecione -'); // overrides <All> on the dropdown
-
   }
+}
+
+/**
+ * Implementation of hook_form_vaga_node_form_alter().
+ */
+function curriculos_form_vaga_node_form_alter(&$form, &$form_state, $form_id) {
+  $module_path = drupal_get_path('module', 'curriculos');
+
+  // Adicionar CSS padrao do modulo
+  drupal_add_css($module_path . "/adm/css/curriculos.css");
+  // Adicionar JS padrado do modulo 
+  drupal_add_js($module_path . "/adm/js/curriculos.js");
+
+  dsm($form);
+
+  $form['field_email']['#suffix'] = "<div id='carregando' style='display:none;'></div><div id='resultados'></div>";
 }
 
 /**
