@@ -29,17 +29,23 @@
 			var iTabela  = "<table border=1 style='width:300px;'><thead><td>Data</td><td>Vaga</td></thead><tbody>";
 			var fTabela  = "</tbody></table>";
 
-		    $.each(data.nodes, function() {
-		    	var res = "";
-		        $.each(this, function(k, v) {
-					res = miolo.replace("@data", v.date);
-					res = res.replace("@vaga", v.title);
-					$("#resultados").append(res);
-		        });
+			if(data.nodes.length > 0){
 
-		    });
+			    $.each(data.nodes, function() {
+			    	var res = "";
+			        $.each(this, function(k, v) {
+						res = miolo.replace("@data", v.data_vaga);
+						res = res.replace("@vaga", v.title);
+						$("#resultados").append(res);
+			        });
 
-		    $("#resultados tr").wrapAll( "<table border='1'>");
+			    });
+
+			    $("#resultados tr").wrapAll( "<table border='1'>");
+
+		    } else {
+		    	$("#resultados").html("<span class='curtir'><img src='http://cdn.osxdaily.com/wp-content/uploads/2013/07/dancing-banana.gif' width='50px'>Eu curti esse email! Pode prosseguir...</span>");
+		    }
 
 		});
 

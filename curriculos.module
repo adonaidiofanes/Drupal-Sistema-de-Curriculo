@@ -287,8 +287,6 @@ function curriculos_form_vaga_node_form_alter(&$form, &$form_state, $form_id) {
   // Adicionar JS padrado do modulo 
   drupal_add_js($module_path . "/adm/js/curriculos.js");
 
-  dsm($form);
-
   $form['field_email']['#suffix'] = "<div id='carregando' style='display:none;'></div><div id='resultados'></div>";
 }
 
