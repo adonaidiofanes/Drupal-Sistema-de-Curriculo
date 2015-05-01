@@ -555,7 +555,7 @@ function _tpl_Curriculo(){
             $field_formacao_grau, // 0:Cursando 1:Concluido
             );
 
-          $FormacaoAcademica = str_replace($arrProcurar, $arrSubstituir, $FormacaoAcademica);
+          $FormacaoAcademica = str_replace($arrProcurar, $arrSubstituir, $FormacaoAcademica) . $hr;
 
         }
       }
@@ -667,7 +667,7 @@ function _tpl_Curriculo(){
       * Gerenciamento Idiomas
       */
 
-      $Idioma = $Nivel_Ingles = $Nivel_Espanhol = $Idioma_Conteudo = "";
+      $Idioma = $Nivel_Ingles = $Nivel_Espanhol = $Idioma_Conteudo = $field_idioma_outro_nivel = "";
 
       if(($p->field_idioma_en  || $p->field_idioma_es || $p->field_idioma_outro)
         && (!empty($p->field_idioma_en['und'][0]['value'])  || !empty($p->field_idioma_es['und'][0]['value']) || !empty($p->field_idioma_outro['und'][0]['value']))
@@ -701,13 +701,13 @@ function _tpl_Curriculo(){
           if($item->field_idioma_outro_nome)
             $field_idioma_outro_nome = $item->field_idioma_outro_nome['und'][0]['value']. ": " ;
 
-          if($item->field_idioma_outro_nivel){
+          if($item->field_idioma_outro_nivel && $item->field_idioma_outro_nivel['und'][0]['value'] != "nenhum"){
             $field_idioma_outro_nivel = $item->field_idioma_outro_nivel['und'][0]['value'];
             $field = field_info_field('field_idioma_outro_nivel');
             $field_idioma_outro_nivel = $field['settings']['allowed_values'][$field_idioma_outro_nivel];
-          }
+          } 
 
-          if($field_idioma_outro_nivel && $field_idioma_outro_nivel != ""){
+          if($field_idioma_outro_nivel && $field_idioma_outro_nivel != "" && $field_idioma_outro_nivel != "Nenhum"){
             $Idioma_Conteudo .= $field_idioma_outro_nome.$field_idioma_outro_nivel;
           }
         }
@@ -718,6 +718,8 @@ function _tpl_Curriculo(){
       } else {
         $Idioma = "";
       }
+
+      $field_nome_completo = strtoupper($field_nome_completo);
 
       $tpl  = "<table width='100%' id='curriculo_usuario'>";
       // Nome
@@ -732,10 +734,9 @@ function _tpl_Curriculo(){
       $tpl .= "Nascimento: $field_data_de_nascimento<Br>";
       $tpl .= "$field_nacionalidade$field_estado_civil<br>";
       $tpl .= "Email: $user->mail<br>";
-      $tpl .= "</td></tr>";
+      $tpl .= "</td></tr>" . $hr;
 
-      $tpl .= $hr . $FormacaoAcademica . $hr;
-      
+      $tpl .= $FormacaoAcademica;
 
       $tpl .= $Idioma;
 

@@ -114,7 +114,9 @@
 											 .replace(".brcolocar",".br")
 											 .replace(".comcolocar",".com")
 											 .replace(".br ,",".br")
-											 .replace(".com ,",".com");
+											 .replace(".com ,",".com")
+											 .replace(".com ",".com");
+											 .replace(".br ",".br");
 
 
 							$("#edit-field-email-und-0-email").val(email);
@@ -154,6 +156,10 @@
 
 					var arrCE = ["fortaleza","ceará","ceara"];
 						cidades(arrCE, corpo, "Fortaleza", "CE");
+						
+					var arrPE = ["recife"];
+						cidades(arrPE, corpo, "Recife", "PE");
+
 				} // Final cidades
 
 				// CIDADES
