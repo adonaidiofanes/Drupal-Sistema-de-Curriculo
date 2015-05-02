@@ -56,6 +56,7 @@
 		*/
 		if( $("body").hasClass("page-node-add-vaga") ){
 			$("#edit-body-und-0-value").on('blur',function(){
+
     			var corpo = CKEDITOR.instances['edit-body-und-0-value'].getData();
     				
     			var email = $("#edit-field-email-und-0-email").val();
@@ -84,13 +85,15 @@
     							 .replace(/Ø /g, "")
     							 .replace(/Ø/g, "")
     							 .replace(/·  /g, "")
-    							 .replace(/·&nbsp;/g, "");
+    							 .replace(/·&nbsp;/g, "")
+    							 .replace(/INTERESSADOS ENCAMINHAREM CURRICULO INFORMANDO NO ASSUNTO O NOME DA VAGA PARA O E-MAIL /g, "")
+    							 .replace(/Interessados encaminhar currículos para:/g, "")
+    							 .replace(/Enviar currículo para:/g, "");
     							 //.replace(/\s+/g, '------'); // Subistitur todos espacos
     							 //.replace(/\+/g, "_________"); // subistitui sinal +
 
 
-    				CKEDITOR.instances['edit-body-und-0-value'].setData(corpo);
-
+    				var CorpoCorreto = corpo;
 
     				corpo = $(corpo).text().toLowerCase();
 					
@@ -160,6 +163,9 @@
 					var arrDqCaxias = ["duque de caxias"];
 						cidades(arrDqCaxias, corpo, "Duque de Caxias", "RJ");
 
+					var arrVilaIsabel = ["vila isabel"];
+						cidades(arrVilaIsabel, corpo, "Rio de Janeiro", "RJ");
+
 					var arrNIguacu = ["nova iguaçu"];
 						cidades(arrNIguacu, corpo, "Nova Iguaçu", "RJ");
 
@@ -186,22 +192,94 @@
 				// CIDADES
 				var bairro = $("#edit-field-bairro-und-0-value").val();
 				if( (corpo != "") && (bairro == "") ){
+					
 					var arrRJ = [];
+
+					// Zona Sul
 					arrRJ.push(["copacabana","Copacabana", "Zona Sul"]);
 					arrRJ.push(["ipanema", "Ipanema", "Zona Sul"]);
 					arrRJ.push(["botafogo", "Botafogo", "Zona Sul"]);
-					arrRJ.push(["barra da tijuca", "Barra da Tijuca", "Zona Oeste"]);
 					arrRJ.push(["jardim botânico", "Jardim Botânico", "Zona Sul"]);
 					arrRJ.push(["leblon", "Leblon", "Zona Sul"]);
-					arrRJ.push(["olaria", "Olaria", "Zona Norte"]);
+					arrRJ.push(["glória", "Glória", "Zona Sul"]);
+					arrRJ.push(["urca", "Urca", "Zona Sul"]);
+					arrRJ.push(["catete", "Catete", "Zona Sul"]);
+					arrRJ.push(["cosme velho", "Cosme Velho", "Zona Sul"]);
+					arrRJ.push(["flamengo", "Flamengo", "Zona Sul"]);
+					arrRJ.push(["gávea", "Gávea", "Zona Sul"]);
+					arrRJ.push(["humaitá", "Humaitá", "Zona Sul"]);
+					arrRJ.push(["laranjeiras", "Laranjeiras", "Zona Sul"]);
+
+					// Zona Oeste
+					arrRJ.push(["barra da tijuca", "Barra da Tijuca", "Zona Oeste"]);
+					arrRJ.push(["bangú", "Bangú", "Zona Oeste"]);
+					arrRJ.push(["bangu", "Bangu", "Zona Oeste"]);
+					arrRJ.push(["campo grande", "Campo Grande", "Zona Oeste"]);
+					arrRJ.push(["jacarepaguá", "Jacarepaguá", "Zona Oeste"]);
+					arrRJ.push(["realengo‎", "Realengo‎", "Zona Oeste"]);
+					arrRJ.push(["santa cruz", "Santa Cruz", "Zona Oeste"]);
+
+					// Baixada Fluminense
 					arrRJ.push(["duque de caxias", "", "Baixada Fluminense"]);
+					arrRJ.push(["nova iguaçu", "", "Baixada Fluminense"]);
+					arrRJ.push(["nilópolis", "", "Baixada Fluminense"]);
+					arrRJ.push(["são joão de meriti", "", "Baixada Fluminense"]);
+					arrRJ.push(["belford roxo", "", "Baixada Fluminense"]);
+					arrRJ.push(["magé", "", "Baixada Fluminense"]);
+					arrRJ.push(["japeri", "", "Baixada Fluminense"]);
+					arrRJ.push(["guapimirim", "", "Baixada Fluminense"]);
+					arrRJ.push(["mesquita", "", "Baixada Fluminense"]);
+					arrRJ.push(["itaguaí", "", "Baixada Fluminense"]);
+					arrRJ.push(["seropédica", "", "Baixada Fluminense"]);
+
+					// Zona Norte
+					arrRJ.push(["olaria", "Olaria", "Zona Norte"]);
+					arrRJ.push(["vila isabel", "Vila Isabel", "Zona Norte"]);
+					arrRJ.push(["ilha do governador", "Ilha do Governador", "Zona Norte"]);
+					arrRJ.push(["bonsucesso‎", "Bonsucesso‎", "Zona Norte"]);
+					arrRJ.push(["campinho", "Campinho‎", "Zona Norte"]);
+					arrRJ.push(["engenho de dentro‎", "Engenho de Dentro‎", "Zona Norte"]);
+					arrRJ.push(["irajá‎", "Irajá‎", "Zona Norte"]);
+					arrRJ.push(["madureira‎", "Madureira‎", "Zona Norte"]);
+					arrRJ.push(["méier‎", "Méier‎", "Zona Norte"]);
+					arrRJ.push(["olaria‎", "Olaria‎", "Zona Norte"]);
+					arrRJ.push(["penha", "Penha", "Zona Norte"]);
+					arrRJ.push(["pilares", "Pilares", "Zona Norte"]);
+					arrRJ.push(["ramos", "Ramos", "Zona Norte"]);
+					arrRJ.push(["rocha miranda", "Rocha Miranda", "Zona Norte"]);
+					arrRJ.push(["são cristóvão", "São Cristóvão", "Zona Norte"]);
+					arrRJ.push(["del castilho", "Del Castilho", "Zona Norte"]);
+					arrRJ.push(["pavuna", "Pavuna", "Zona Norte"]);
 
 					bairros(arrRJ, corpo);
 				}
 
 				// Pretensão salarial				
 				if ( corpo.match( /(pretenção|pretensão)/ ) ) {
-					$('#edit-field-field-pretencao-salarial-und').prop('checked', true);
+					$('#edit-field-pretencao-salarial-und').prop('checked', true);
+				}
+
+				var verificaCorpo = CKEDITOR.instances['edit-body-und-0-value'].getData();
+				if( !verificaCorpo.match(/(EMPRESA CONTRATA)/) && verificaCorpo != "" ){
+					// Adicionar info adicionais
+					var iTitulo = $("#edit-title").val();
+					var iEstado = $("#edit-field-estado-und option:selected" ).text();
+					var iCidade = $("#edit-field-cidade-und-0-value").val();
+					var iBairro = $("#edit-field-bairro-und-0-value").val();
+					var iZona = $("#edit-field-zona-und-0-value").val();
+
+					var especificacoes = "<p><b>EMPRESA CONTRATA ";
+
+						if( iTitulo != "" ){ especificacoes += iTitulo + " "; }
+						if( iCidade != "" ){ especificacoes += "PARA TRABALHAR EM " + iCidade + " "; }
+						if( (iEstado != "") && (iEstado != "- Nenhum -") ){ especificacoes += "/ " + iEstado + " "; }
+						if( iBairro != "" ){ especificacoes += "NO BAIRRO " + iBairro + " "; }
+						if( iZona != "" ){ especificacoes += "NA " + iZona + " "; }
+						especificacoes += "</b></p>";
+
+					CorpoCorreto = especificacoes + CorpoCorreto;
+
+					CKEDITOR.instances['edit-body-und-0-value'].setData(CorpoCorreto);
 				}
 
 			});
