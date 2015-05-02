@@ -7,3 +7,6 @@
 .td_vaga {border-bottom: 1px solid}
 
 .curtir{background: #D3D327; padding:10px; border: 1px solid #ADAD00;}
+
+fieldset#edit-body-und-0-format,
+#switch_edit-body-und-0-value {display:none!important;}

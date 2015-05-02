@@ -63,6 +63,7 @@
 
     				corpo = corpo.replace("<p><br />", '<p>')
     							 .replace(/<p>&nbsp;/g, "<p>")
+    							 .replace(/&nbsp;&nbsp;/g, '')
     							 .replace(/&nbsp; &nbsp;/g, "&nbsp;")
     							 .replace(/&nbsp;&nbsp;&nbsp;/g, "&nbsp;")
     							 .replace(/&nbsp;&nbsp;/g, "&nbsp;")
@@ -70,6 +71,7 @@
     							 .replace(/Benefícios:/g, "<b>BENEFÍCIOS</b>")
     							 .replace(/Salário:/g, "<b>SALÁRIO:</b>")
     							 .replace("VT", 'Vale Transporte')
+    							 .replace("VR", 'Vale Refeição')
     							 .replace("Horário", "<b>INFORMAÇÕES ADICIONAIS:<br>Horário</b>")
     							 .replace("Requisitos", "<b>REQUISITOS</b>")
     							 .replace("REQUISITOS:","<b>REQUISITOS:</b>")
@@ -77,7 +79,14 @@
     							 .replace("Atividades","<b>ATIVIDADES</b>")
     							 .replace("Local", "<b>LOCAL</b>")
     							 .replace(/ü /g, "")
-    							 .replace(/CURRÍCULOS FORA DO PERFIL NÃO SERÃO ANALISADOS! /g, "");
+    							 .replace(/CURRÍCULOS FORA DO PERFIL NÃO SERÃO ANALISADOS! /g, "")
+    							 .replace(/Ø&nbsp;/g, "")
+    							 .replace(/Ø /g, "")
+    							 .replace(/Ø/g, "")
+    							 .replace(/·  /g, "")
+    							 .replace(/·&nbsp;/g, "");
+    							 //.replace(/\s+/g, '------'); // Subistitur todos espacos
+    							 //.replace(/\+/g, "_________"); // subistitui sinal +
 
 
     				CKEDITOR.instances['edit-body-und-0-value'].setData(corpo);
@@ -115,7 +124,7 @@
 											 .replace(".comcolocar",".com")
 											 .replace(".br ,",".br")
 											 .replace(".com ,",".com")
-											 .replace(".com ",".com");
+											 .replace(".com ",".com")
 											 .replace(".br ",".br");
 
 
@@ -148,15 +157,27 @@
 					var arrNiteroi = ["niterói"];
 						cidades(arrNiteroi, corpo, "Niterói", "RJ");
 
-					var arrSP = ["campinas","são paulo"];
+					var arrDqCaxias = ["duque de caxias"];
+						cidades(arrDqCaxias, corpo, "Duque de Caxias", "RJ");
+
+					var arrNIguacu = ["nova iguaçu"];
+						cidades(arrNIguacu, corpo, "Nova Iguaçu", "RJ");
+
+					var arrSP = ["são paulo"];
 						cidades(arrSP, corpo, "São Paulo", "SP");
 
-					var arrMG = ["bh","belo horizonte", "minas gerais","alfenas","contagem"];
+					var arrCampinas = ["campinas"];
+						cidades(arrCampinas, corpo, "Campinas", "SP");
+
+					var arrMG = ["minas gerais","alfenas","contagem"];
 						cidades(arrMG, corpo, "Minas Gerais", "MG");
+
+					var arrMG_BH = ["bh","belo horizonte"];
+						cidades(arrMG_BH, corpo, "Belo Horizonte", "MG");
 
 					var arrCE = ["fortaleza","ceará","ceara"];
 						cidades(arrCE, corpo, "Fortaleza", "CE");
-						
+
 					var arrPE = ["recife"];
 						cidades(arrPE, corpo, "Recife", "PE");
 
@@ -171,6 +192,9 @@
 					arrRJ.push(["botafogo", "Botafogo", "Zona Sul"]);
 					arrRJ.push(["barra da tijuca", "Barra da Tijuca", "Zona Oeste"]);
 					arrRJ.push(["jardim botânico", "Jardim Botânico", "Zona Sul"]);
+					arrRJ.push(["leblon", "Leblon", "Zona Sul"]);
+					arrRJ.push(["olaria", "Olaria", "Zona Norte"]);
+					arrRJ.push(["duque de caxias", "", "Baixada Fluminense"]);
 
 					bairros(arrRJ, corpo);
 				}
