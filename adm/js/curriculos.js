@@ -199,6 +199,11 @@
 					bairros(arrRJ, corpo);
 				}
 
+				// Pretensão salarial				
+				if ( corpo.match( /(pretenção|pretensão)/ ) ) {
+					$('#edit-field-field-pretencao-salarial-und').prop('checked', true);
+				}
+
 			});
 		}
 
@@ -221,20 +226,6 @@
 					$("#edit-field-bairro-und-0-value").val(arr[i][1]);
 					$("#edit-field-zona-und-0-value").val(arr[i][2]);
 				}
-
-/*
-[Array[3], Array[3], Array[3]]
-0: Array[3]
-0: "copacabana"
-1: "Copacabana"
-2: "Zona Sul"
-length: 3
-*/			
-				//var n = corpo.indexOf(arr[i]);
-				/*if(n > -1){ 
-					$("#edit-field-bairro-und-0-value").val(arr[i][0]); 
-					break; 
-				}*/
 			};
 		}
 
