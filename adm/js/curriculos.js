@@ -92,6 +92,8 @@
     							 //.replace(/\s+/g, '------'); // Subistitur todos espacos
     							 //.replace(/\+/g, "_________"); // subistitui sinal +
 
+    							 CKEDITOR.instances['edit-body-und-0-value'].setData(corpo);
+
 
     				var CorpoCorreto = corpo;
 
@@ -143,16 +145,6 @@
 				// CIDADES
 				var cidade = $("#edit-field-cidade-und-0-value").val();
 				if( (corpo != "") && (cidade == "") ){
-					var arrRJ = ["rj",
-								 "rio de janeiro",
-								 "carioca",
-								 "nova iguaçu",
-								 "jardim botânico",
-								 "botafogo",
-								 "ipanema",
-								 "barra da tijuca"];
-
-						cidades(arrRJ, corpo, "Rio de Janeiro", "RJ");
 
 					var arrSaoGoncalo = ["são gonçalo"];
 						cidades(arrSaoGoncalo, corpo, "São Gonçalo", "RJ");
@@ -160,14 +152,53 @@
 					var arrNiteroi = ["niterói"];
 						cidades(arrNiteroi, corpo, "Niterói", "RJ");
 
+
+					// ########## Baixada Fluminense
+
 					var arrDqCaxias = ["duque de caxias"];
 						cidades(arrDqCaxias, corpo, "Duque de Caxias", "RJ");
+
+					var arrNIguacu = ["nova iguaçu"];
+						cidades(arrNIguacu, corpo, "Nova Iguaçu", "RJ");
+
+					var arrNilopolis = ["nilópolis"];
+						cidades(arrNilopolis, corpo, "Nilópolis", "RJ");
+						
+					var arrNilopolis = ["nilópolis"];
+						cidades(arrNilopolis, corpo, "Nilópolis", "RJ");
+
+					var arrSaoJoao = ["são joão de meriti"];
+						cidades(arrSaoJoao, corpo, "São João de Meriti", "RJ");
+
+					var arrBeld = ["belford roxo"];
+						cidades(arrBeld, corpo, "Belford Roxo", "RJ");
+
+					var arrMage = ["magé"];
+						cidades(arrMage, corpo, "Magé", "RJ");
+
+					var arrJaperi = ["japeri"];
+						cidades(arrJaperi, corpo, "Japeri", "RJ");
+
+					var arrGuapimirim = ["guapimirim"];
+						cidades(arrGuapimirim, corpo, "Guapimirim", "RJ");
+
+					var arrMesquita = ["mesquita"];
+						cidades(arrMesquita, corpo, "Mesquita", "RJ");
+
+					var arrItaguai = ["itaguaí"];
+						cidades(arrItaguai, corpo, "Itaguaí", "RJ");
+
+					var arrSeropedica = ["seropédica"];
+						cidades(arrSeropedica, corpo, "Seropédica", "RJ");
+
+					// ########## Final Baixada Fluminense
+
 
 					var arrVilaIsabel = ["vila isabel"];
 						cidades(arrVilaIsabel, corpo, "Rio de Janeiro", "RJ");
 
-					var arrNIguacu = ["nova iguaçu"];
-						cidades(arrNIguacu, corpo, "Nova Iguaçu", "RJ");
+					var arrSaoCristovao = ["são cristóvão"];
+						cidades(arrSaoCristovao, corpo, "Rio de Janeiro", "RJ");
 
 					var arrSP = ["são paulo"];
 						cidades(arrSP, corpo, "São Paulo", "SP");
@@ -186,6 +217,19 @@
 
 					var arrPE = ["recife"];
 						cidades(arrPE, corpo, "Recife", "PE");
+
+					var arrAldeota = ["aldeota"];
+						cidades(arrAldeota, corpo, "Fortaleza", "CE");
+
+					var arrRJ = ["rj",
+								 "rio de janeiro",
+								 "carioca",
+								 "jardim botânico",
+								 "botafogo",
+								 "ipanema",
+								 "barra da tijuca"];
+
+						cidades(arrRJ, corpo, "Rio de Janeiro", "RJ");					
 
 				} // Final cidades
 
@@ -218,6 +262,8 @@
 					arrRJ.push(["jacarepaguá", "Jacarepaguá", "Zona Oeste"]);
 					arrRJ.push(["realengo‎", "Realengo‎", "Zona Oeste"]);
 					arrRJ.push(["santa cruz", "Santa Cruz", "Zona Oeste"]);
+					arrRJ.push(["recreio dos bandeirantes", "Recreio dos Bandeirantes", "Zona Oeste"]);
+					arrRJ.push(["curicica", "Curicica", "Zona Oeste"]);
 
 					// Baixada Fluminense
 					arrRJ.push(["duque de caxias", "", "Baixada Fluminense"]);
@@ -243,13 +289,16 @@
 					arrRJ.push(["madureira‎", "Madureira‎", "Zona Norte"]);
 					arrRJ.push(["méier‎", "Méier‎", "Zona Norte"]);
 					arrRJ.push(["olaria‎", "Olaria‎", "Zona Norte"]);
-					arrRJ.push(["penha", "Penha", "Zona Norte"]);
+					//arrRJ.push(["penha", "Penha", "Zona Norte"]);
 					arrRJ.push(["pilares", "Pilares", "Zona Norte"]);
 					arrRJ.push(["ramos", "Ramos", "Zona Norte"]);
 					arrRJ.push(["rocha miranda", "Rocha Miranda", "Zona Norte"]);
 					arrRJ.push(["são cristóvão", "São Cristóvão", "Zona Norte"]);
 					arrRJ.push(["del castilho", "Del Castilho", "Zona Norte"]);
 					arrRJ.push(["pavuna", "Pavuna", "Zona Norte"]);
+
+					// Outros
+					arrRJ.push(["aldeota", "Aldeota", ""]);
 
 					bairros(arrRJ, corpo);
 				}
@@ -259,7 +308,7 @@
 					$('#edit-field-pretencao-salarial-und').prop('checked', true);
 				}
 
-				var verificaCorpo = CKEDITOR.instances['edit-body-und-0-value'].getData();
+				/*var verificaCorpo = CKEDITOR.instances['edit-body-und-0-value'].getData();
 				if( !verificaCorpo.match(/(EMPRESA CONTRATA)/) && verificaCorpo != "" ){
 					// Adicionar info adicionais
 					var iTitulo = $("#edit-title").val();
@@ -280,7 +329,7 @@
 					CorpoCorreto = especificacoes + CorpoCorreto;
 
 					CKEDITOR.instances['edit-body-und-0-value'].setData(CorpoCorreto);
-				}
+				}*/
 
 			});
 		}
@@ -289,8 +338,13 @@
 			for (var i = arr.length - 1; i >= 0; i--) {
 				var n = corpo.indexOf(arr[i]);
 				if(n > -1){ 
-					$("#edit-field-cidade-und-0-value").val(nomeCidade); 
+					
+					if( $("#edit-field-cidade-und-0-value").val() == "" ){
+						$("#edit-field-cidade-und-0-value").val(nomeCidade); 
+					}
+
 					$("#edit-field-estado-und").val(nomeEstado);
+
 					break; 
 				}
 			};
@@ -301,8 +355,15 @@
 				var n = corpo.indexOf(arr[i][0]);
 
 				if(n>1){
-					$("#edit-field-bairro-und-0-value").val(arr[i][1]);
-					$("#edit-field-zona-und-0-value").val(arr[i][2]);
+
+					if ( $("#edit-field-bairro-und-0-value").val() == "" ) {
+						$("#edit-field-bairro-und-0-value").val(arr[i][1]);
+					}
+
+					if( $("#edit-field-zona-und-0-value").val(arr[i][2]) == "" ){
+						$("#edit-field-zona-und-0-value").val(arr[i][2]);
+					}
+
 				}
 			};
 		}
